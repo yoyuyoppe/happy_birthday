@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Праздничная страница</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        .cake {
+            width: 200px;
+            height: 180px;
+            background: #f9d1a5;
+            border-radius: 10px 10px 0 0;
+            position: relative;
+            margin: 0 auto 40px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .cake::before,
+        .cake::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            width: 100%;
+            height: 20px;
+            background: #d2691e;
+            left: 0;
+        }
+
+        .cake::before {
+            border-radius: 5px 5px 0 0;
+        }
+
+        .cake::after {
+            background: #8b4513;
+            height: 15px;
+            bottom: calc(100% + 20px);
+            border-radius: 5px 5px 0 0;
+        }
+
+        .candle {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 40px;
+            background: #ff6b6b;
+            border-radius: 4px;
+        }
+
+        .candle::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 12px solid #ffcc00;
+        }
+
+        .balloons {
+            position: relative;
+            height: 200px;
+            margin-bottom: 30px;
+        }
+
+        .balloon {
+            position: absolute;
+            width: 60px;
+            height: 70px;
+            border-radius: 50%;
+            cursor: pointer;
+            animation: float 4s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .balloon:hover {
+            transform: scale(1.1);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .confetti {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        .confetti.show {
+            opacity: 1;
+        }
+
+        .message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 30px;
+            border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            font-size: 1.2rem;
+            color: #333;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s, transform 0.5s;
+            transform: translateY(-20px) translateX(-50%);
+        }
+
+        .message.show {
+            opacity: 1;
+            transform: translateY(0) translateX(-50%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>С днём рождения</h1>
+        <div class="cake">
+            <div class="candle"></div>
+        </div>
+        <div class="balloons" id="balloonsContainer"></div>
+    </div>
+
+    <div class="message" id="message"></div>
+
+    <script>
+        // Массив поздравлений
+        const greetings = [
+            'С днём рождения! Пусть мечты сбываются!',
+            'Желаю счастья, здоровья и удачи!',
+            'Пусть каждый день будет полон радости!',
+            'С праздником! Пусть будет много поводов для улыбок!',
+            'Желаю исполнения самых заветных желаний!',
+            'Пусть жизнь будет сладкой, как торт!',
+            'Счастья, любви и море позитива!',
+            'Пусть удача сопутствует во всём!',
+            'Желаю ярких моментов и тёплых встреч!',
+            'Пусть будет много счастливых мгновений!'
+        ];
+
+        // Цвета шариков
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#ff9f1c', '#f7786b', '#c56cf0'];
+
+        // Контейнер для шариков
+        const balloonsContainer = document.getElementById('balloonsContainer');
+        const messageElement = document.getElementById('message');
+
+        // Создаём шарики
+        function createBalloons(count) {
+            for (let i = 0; i < count; i++) {
+                const balloon = document.createElement('div');
+                balloon.className = 'balloon';
+                
+                // Случайный цвет
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                balloon.style.backgroundColor = color;
+                
+                // Случайное положение
+                const left = Math.random() * (balloonsContainer.offsetWidth - 60);
+                const top = Math.random() * (balloonsContainer.offsetHeight - 70);
+                
+                balloon.style.left = `${left}px`;
+                balloon.style.top = `${top}px`;
+                
+                // Добавляем символ шарика (можно заменить на изображение)
+                balloon.textContent = '🎈';
+                
+                // Обработчик клика
+                balloon.addEventListener('click', () => {
+                    popBalloon(balloon);
+                });
+                
+                balloonsContainer.appendChild(balloon);
+            }
+        }
+
+        // Функция "лопания" шарика
+        function popBalloon(balloon) {
+            // Удаляем шарик
+            balloon.remove();
+            
+            // Выбираем случайное поздравление
+            const greeting = greetings[Math.floor(Math.random() * greetings.length)];
+            
+            // Показываем сообщение
+            messageElement.textContent = greeting;
+			
+			          // Анимация появления сообщения
+            messageElement.classList.add('show');
+
+            // Через 3 секунды скрываем сообщение
+            setTimeout(() => {
+                messageElement.classList.remove('show');
+            }, 3000);
+
+            // Эффект конфетти (опционально)
+            createConfetti();
+        }
+
+        // Функция создания эффекта конфетти
+        function createConfetti() {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            
+            // 20 конфетти‑частиц
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'absolute';
+                particle.style.width = '8px';
+                particle.style.height = '8px';
+                
+                // Случайный цвет
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.backgroundColor = color;
+                
+                // Случайная позиция и размер
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.transform = `scale(${Math.random() * 2 + 0.5})`;
+                
+                // Анимация падения
+                particle.style.animation = `fall ${Math.random() * 3 + 2}s linear`;
+                
+                confetti.appendChild(particle);
+            }
+            
+            document.body.appendChild(confetti);
+            
+            // Показываем конфетти
+            confetti.classList.add('show');
+            
+            // Удаляем через 5 секунд
+            setTimeout(() => {
+                confetti.remove();
+            }, 5000);
+        }
+
+        // Анимация падения конфетти (добавляем в CSS через JS)
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                0% {
+                    transform: translateY(0) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Инициализация: создаём 10 шариков при загрузке
+        window.addEventListener('load', () => {
+            createBalloons(10);
+        });
+    </script>
+</body>
+</html>
